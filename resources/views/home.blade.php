@@ -1,19 +1,12 @@
-@extends('layouts.app')
+<x-app-layout>
 
-@section('content')
-
-<!-- HERO -->
 @php
-    $asal = request('asal');
-
     $rute = [
-        'Purwokerto' => ['Semarang', 'Yogyakarta', 'Cilacap'],
+        'Purwokerto' => ['Yogyakarta', 'Semarang', 'Cilacap'],
         'Cilacap' => ['Purwokerto', 'Semarang'],
-        'Semarang' => ['Cilacap', 'Purwokerto'],
         'Yogyakarta' => ['Purwokerto'],
+        'Semarang' => ['Cilacap', 'Purwokerto'],
     ];
-
-    $tujuanList = $rute[$asal] ?? [];
 @endphp
 
 <section class="hero text-center">
@@ -21,55 +14,76 @@
         <h3 class="mb-4">Hallo, Lagi Mau Kemana?</h3>
 
         <div class="search-box mx-auto col-md-8">
-            <form method="GET" class="row g-3">
+            <form method="GET" action="{{ route('jadwal.index') }}" class="row g-3">
+
+                {{-- ASAL --}}
                 <div class="col-md-6">
                     <label>Asal</label>
-                    <select name="asal" class="form-select" onchange="this.form.submit()">
+                    <select name="asal" id="asal" class="form-select" required>
                         <option value="">-- Pilih Asal --</option>
                         @foreach ($rute as $kota => $x)
-                            <option value="{{ $kota }}" {{ $asal == $kota ? 'selected' : '' }}>
-                                {{ $kota }}
-                            </option>
+                            <option value="{{ $kota }}">{{ $kota }}</option>
                         @endforeach
                     </select>
                 </div>
 
+                {{-- TUJUAN --}}
                 <div class="col-md-6">
                     <label>Tujuan</label>
-                    <select name="tujuan" class="form-select">
+                    <select name="tujuan" id="tujuan" class="form-select" required>
                         <option value="">-- Pilih Tujuan --</option>
-
-                        @foreach ($tujuanList as $tujuan)
-                            <option value="{{ $tujuan }}">
-                                {{ $tujuan }}
-                            </option>
-                        @endforeach
                     </select>
                 </div>
 
+                {{-- TANGGAL & PENUMPANG --}}
                 <div class="col-md-6">
                     <label>Tanggal</label>
-                    <input type="date" name="tanggal" class="form-control">
+                    <input type="date" name="tanggal_berangkat" class="form-control" required>
                 </div>
 
                 <div class="col-md-6">
-                    <label>Penumpang</label>
-                    <select name="penumpang" class="form-select">
-                        <option>1</option>
-                        <option>2</option>
-                        <option>3</option>
+                    <label>Jumlah Penumpang</label>
+                    <select name="penumpang" class="form-select" required>
+                        <option value="" disabled selected>Pilih jumlah</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
                     </select>
                 </div>
-
+                {{-- BUTTON --}}
                 <div class="col-12 text-center">
-                    <button class="btn btn-primary px-5 mt-3" type="submit">
-                        Cari
+                    <button class="btn btn-primary px-5 mt-3">
+                        Cari Jadwal
                     </button>
                 </div>
+
             </form>
         </div>
     </div>
 </section>
+
+{{-- JAVASCRIPT --}}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const asal = document.getElementById('asal');
+    const tujuan = document.getElementById('tujuan');
+    const rute = @json($rute);
+
+    asal.addEventListener('change', function () {
+        tujuan.innerHTML = '<option value="">-- Pilih Tujuan --</option>';
+
+        if (rute[this.value]) {
+            rute[this.value].forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t;
+                opt.textContent = t;
+                tujuan.appendChild(opt);
+            });
+        }
+    });
+});
+</script>
 
 <!-- RUTE -->
 <section class="section-blue text-center">
@@ -117,4 +131,4 @@
     </div>
 </section>
 
-@endsection
+</x-app-layout>
